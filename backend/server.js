@@ -49,10 +49,28 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/comms', commsRoutes);
 
+// Serverless DB Middleware for Vercel
+let isInitialized = false;
+app.use(async (req, res, next) => {
+  if (process.env.VERCEL && !isInitialized) {
+    try {
+      const conn = await connectDB();
+      if (conn) {
+        await authService.checkAndSeedFromEnv();
+        await authService.seedDemoAccounts();
+        isInitialized = true;
+      }
+    } catch (e) {
+      console.warn('[Vercel DB Init Warning]:', e.message);
+    }
+  }
+  next();
+});
+
 // Global Error Handler
 app.use(errorHandler);
 
-// Connect DB & start server
+// Connect DB & start server (for local development)
 const startServer = async () => {
   const conn = await connectDB();
   if (conn) {
@@ -76,8 +94,10 @@ const startServer = async () => {
   });
 };
 
-startServer().catch(err => {
-  console.error('[Startup Error]:', err);
-});
+if (!process.env.VERCEL) {
+  startServer().catch(err => {
+    console.error('[Startup Error]:', err);
+  });
+}
 
 module.exports = app;

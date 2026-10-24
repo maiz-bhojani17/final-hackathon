@@ -3,11 +3,16 @@ const mongoose = require('mongoose');
 let retryInterval = null;
 
 const connectDB = async () => {
+  // If already connected, reuse existing connection (crucial for serverless lambdas)
+  if (mongoose.connection && mongoose.connection.readyState >= 1) {
+    return mongoose.connection;
+  }
+
   const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hcm_lite';
   try {
     const conn = await mongoose.connect(uri, {
       autoIndex: true,
-      serverSelectionTimeoutMS: 3000
+      serverSelectionTimeoutMS: 5000
     });
     console.log(`[MongoDB] Connected successfully: ${conn.connection.host}`);
     if (retryInterval) {
@@ -16,6 +21,11 @@ const connectDB = async () => {
     }
     return conn;
   } catch (error) {
+    if (process.env.VERCEL) {
+      console.error(`[MongoDB Vercel Error]: Failed to connect to MONGODB_URI. Make sure your MongoDB Atlas connection string is set in Vercel environment variables. (${error.message})`);
+      return null;
+    }
+
     console.warn(`[MongoDB] Local MongoDB on 127.0.0.1 not reachable (${error.message}).`);
     
     // Auto-launch In-Memory MongoDB Server so user needs ZERO setup!
