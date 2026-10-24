@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 let retryInterval = null;
+let lastDbError = null;
 
 const connectDB = async () => {
   // If already connected, reuse existing connection (crucial for serverless lambdas)
@@ -12,15 +13,18 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(uri, {
       autoIndex: true,
-      serverSelectionTimeoutMS: 5000
+      serverSelectionTimeoutMS: 10000
     });
     console.log(`[MongoDB] Connected successfully: ${conn.connection.host}`);
+    lastDbError = null;
     if (retryInterval) {
       clearInterval(retryInterval);
       retryInterval = null;
     }
     return conn;
   } catch (error) {
+    lastDbError = error.message;
+    console.error(`[MongoDB Connect Error]: ${error.message}`);
     if (process.env.VERCEL) {
       console.error(`[MongoDB Vercel Error]: Failed to connect to MONGODB_URI. Make sure your MongoDB Atlas connection string is set in Vercel environment variables. (${error.message})`);
       return null;
@@ -78,4 +82,7 @@ const connectDB = async () => {
   }
 };
 
+const getLastDbError = () => lastDbError;
+
 module.exports = connectDB;
+module.exports.getLastDbError = getLastDbError;

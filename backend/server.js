@@ -28,10 +28,42 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health Check
-app.get('/api/health', (req, res) => {
+// Ensure DB Connection Middleware on all incoming requests
+let isInitialized = false;
+app.use(async (req, res, next) => {
+  try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const conn = await connectDB();
+      if (conn && !isInitialized) {
+        await authService.checkAndSeedFromEnv();
+        await authService.seedDemoAccounts();
+        isInitialized = true;
+      }
+    }
+  } catch (e) {
+    console.warn('[DB Request Init Warning]:', e.message);
+  }
+  next();
+});
+
+// Health Check with detailed DB status
+app.get('/api/health', async (req, res) => {
+  const mongoose = require('mongoose');
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await connectDB();
+    } catch (e) {}
+  }
+  const isDbReady = mongoose.connection.readyState === 1;
+  const lastError = connectDB.getLastDbError ? connectDB.getLastDbError() : null;
+
   res.json({
-    status: 'healthy',
+    status: isDbReady ? 'healthy' : 'degraded',
+    dbConnected: isDbReady,
+    dbReadyState: mongoose.connection.readyState,
+    dbError: lastError,
+    hasMongoUri: !!process.env.MONGODB_URI,
     timestamp: new Date().toISOString(),
     service: 'HCM Lite Backend'
   });
@@ -48,24 +80,6 @@ app.use('/api/payroll', payrollRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/comms', commsRoutes);
-
-// Serverless DB Middleware for Vercel
-let isInitialized = false;
-app.use(async (req, res, next) => {
-  if (process.env.VERCEL && !isInitialized) {
-    try {
-      const conn = await connectDB();
-      if (conn) {
-        await authService.checkAndSeedFromEnv();
-        await authService.seedDemoAccounts();
-        isInitialized = true;
-      }
-    } catch (e) {
-      console.warn('[Vercel DB Init Warning]:', e.message);
-    }
-  }
-  next();
-});
 
 // Global Error Handler
 app.use(errorHandler);
