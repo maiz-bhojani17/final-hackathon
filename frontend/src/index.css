@@ -63,9 +63,24 @@
     letter-spacing: -0.025em;
     color: var(--color-text);
   }
+
+  /* Form elements default to semantic borders and focus */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    border-color: var(--color-border);
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--color-muted-green) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 1px var(--color-muted-green) !important;
+  }
 }
 
-/* Natural Card & Surface Tokens */
+/* Natural Card & Surface Classes */
 .sage-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -144,100 +159,4 @@ tr:last-child td {
 }
 tbody tr:hover {
   background-color: var(--color-hover);
-}
-
-/* Global Component Harmony Overrides */
-@layer components {
-  /* Primary Action Buttons */
-  .bg-indigo-600,
-  .bg-brand-600 {
-    background-color: #29372D !important;
-    color: #F5F3EB !important;
-  }
-  .bg-indigo-600:hover,
-  .bg-brand-600:hover,
-  .hover\:bg-indigo-700:hover,
-  .hover\:bg-brand-700:hover {
-    background-color: #1e2820 !important;
-  }
-  .dark .bg-indigo-600,
-  .dark .bg-brand-600 {
-    background-color: #A3B18A !important;
-    color: #171C18 !important;
-  }
-  .dark .bg-indigo-600:hover,
-  .dark .bg-brand-600:hover,
-  .dark .hover\:bg-indigo-700:hover,
-  .dark .hover\:bg-brand-700:hover {
-    background-color: #8A9A71 !important;
-  }
-
-  /* Secondary Buttons & Surfaces */
-  .border-slate-200,
-  .border-slate-300 {
-    border-color: #E1E4D9 !important;
-  }
-  .dark .border-slate-800,
-  .dark .border-slate-700 {
-    border-color: #384238 !important;
-  }
-
-  .bg-slate-50,
-  .bg-slate-100 {
-    background-color: #EDEFE6 !important;
-  }
-  .dark .bg-slate-900,
-  .dark .bg-[#111827] {
-    background-color: #222922 !important;
-  }
-  .dark .bg-slate-800 {
-    background-color: #293229 !important;
-  }
-  .dark .bg-slate-950,
-  .dark .bg-[#0b0f19] {
-    background-color: #171C18 !important;
-  }
-
-  /* Hover States */
-  .hover\:bg-slate-50:hover,
-  .hover\:bg-slate-100:hover {
-    background-color: #E8EBE0 !important;
-  }
-  .dark .hover\:bg-slate-800:hover,
-  .dark .hover\:bg-slate-850:hover {
-    background-color: #2C352C !important;
-  }
-
-  /* Typography Colors */
-  .text-slate-900,
-  .text-slate-800 {
-    color: #252A24 !important;
-  }
-  .dark .text-white,
-  .dark .text-slate-100,
-  .dark .text-slate-200 {
-    color: #EEF1E9 !important;
-  }
-  .text-slate-600,
-  .text-slate-500 {
-    color: #697064 !important;
-  }
-  .dark .text-slate-400,
-  .dark .text-slate-300 {
-    color: #B1B9AC !important;
-  }
-
-  /* Form Controls */
-  input:not([type="checkbox"]):not([type="radio"]),
-  select,
-  textarea {
-    border-color: var(--color-border) !important;
-  }
-  input:not([type="checkbox"]):not([type="radio"]):focus,
-  select:focus,
-  textarea:focus {
-    border-color: var(--color-muted-green) !important;
-    outline: none !important;
-    box-shadow: 0 0 0 1px var(--color-muted-green) !important;
-  }
 }
