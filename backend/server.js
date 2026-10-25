@@ -69,17 +69,24 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/org', orgRoutes);
-app.use('/api/employees', employeeRoutes);
-app.use('/api/attendance', attendanceRoutes);
-app.use('/api/leave', leaveRoutes);
-app.use('/api/payroll', payrollRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/ai', aiRoutes);
-app.use('/api/comms', commsRoutes);
+// API Routes (Mounted on both /api/* and direct /* paths to guarantee compatibility)
+const routes = [
+  ['/auth', authRoutes],
+  ['/settings', settingsRoutes],
+  ['/org', orgRoutes],
+  ['/employees', employeeRoutes],
+  ['/attendance', attendanceRoutes],
+  ['/leave', leaveRoutes],
+  ['/payroll', payrollRoutes],
+  ['/dashboard', dashboardRoutes],
+  ['/ai', aiRoutes],
+  ['/comms', commsRoutes]
+];
+
+routes.forEach(([path, router]) => {
+  app.use(`/api${path}`, router);
+  app.use(path, router);
+});
 
 // Global Error Handler
 app.use(errorHandler);

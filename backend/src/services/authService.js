@@ -2,6 +2,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Settings = require('../models/Settings');
 const Employee = require('../models/Employee');
+const Department = require('../models/Department');
+const Designation = require('../models/Designation');
+const LeaveType = require('../models/LeaveType');
 const { recordAudit } = require('../middleware/audit');
 
 class AuthService {
